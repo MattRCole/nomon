@@ -1,0 +1,12 @@
+escapeAllArgs() {
+    escapedStuff="$(printf '%q ' "$@")"
+    echo -n "${escapedStuff% }"
+}
+
+runInBackground() {
+    stmnt=$(escapeAllArgs "$@")
+    eval "$stmnt" &
+    toReturn="$(ps -ef | grep -F --regexp="$(echo -n "$@")" - | awk ' !/grep/ {print $2} ')"
+    return "$toReturn"
+}
+

@@ -1,0 +1,64 @@
+# Provides pushEscapeSeparator, popEscapeSeparator, pushEscapeTerminator, popEscapeTerminator, escapeAll
+# sourced flag is __escape_source is set to "sourced"
+
+__escape_source="sourced"
+
+__escapeSeparator=" "
+__escapeTerminator=""
+
+__escapeSeparatorStack=(' ')
+__escapeTerminatorStack=('')
+
+
+pushEscapeSeparator() {
+    local separator="$1"
+
+    __escapeSeparatorStack+=("$separator")
+    __escapeSeparator="$1"
+}
+
+popEscapeSeparator() {
+    local defaultEscapeSeparator=" "
+    if [ ${#__escapeSeparatorStack[@]} -eq 0 ]
+    then
+        __escapeSeparator="$defaultEscapeSeparator"
+        __escapeSeparatorStack=("$defaultEscapeSeparator")
+        return 0
+    fi
+
+    index=("${!__escapeSeparatorStack[@]}");
+    unset '__escapeSeparatorStack[${index[@]: -1}]'
+    index=("${!__escapeSeparatorStack[@]}");
+    __escapeSeparator="${__escapeSeparatorStack[${index[@]: -1}]}"
+    return 0
+}
+
+pushEscapeTerminator() {
+    local terminator="$1"
+
+    __escapeTerminatorStack+=("$terminator")
+    __escapeTerminator="$1"
+}
+
+popEscapeTerminator() {
+    local defaultEscapeTerminator=" "
+    if [ ${#__escapeTerminatorStack[@]} -eq 0 ]
+    then
+        __escapeTerminator="$defaultEscapeTerminator"
+        __escapeTerminatorStack=("$defaultEscapeTerminator")
+        return 0
+    fi
+
+    index=("${!__escapeTerminatorStack[@]}");
+    unset '__escapeTerminatorStack[${index[@]: -1}]'
+    index=("${!__escapeTerminatorStack[@]}");
+    __escapeTerminator="${__escapeTerminatorStack[${index[@]: -1}]}"
+    return 0
+}
+
+escapeAll() {
+    local escaped
+    printf -v escaped "%q$__escapeSeparator" "$@"
+    printf "%s$__escapeTerminator" "${escaped%$__escapeSeparator}"
+}
+

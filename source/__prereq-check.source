@@ -1,0 +1,68 @@
+# provides prereqCheck
+# sourced flag is __prereq_check_source is set to "sourced"
+
+__prereq_check_source="sourced"
+
+
+__installInstructions() {
+    local AURInstructionsURL="https://wiki.archlinux.org/title/Arch_User_Repository"
+    local AURPackageName="fswatch"
+    local AURGitRepoURL="https://aur.archlinux.org/${ARUPackageName}.git"
+    local commaDelimitedTmp="$(printf '%s, ' "$@")"
+    local commaDelimited="${commaDelimitedTmp%, }"
+    local allMissing="$@"
+    if [ "$#" -eq 1 ]
+    then
+        printf 'The following prerequisite is not installed: %s.\n' "$allMissing"
+        printf 'You must install it before using nomon.\n'
+    else
+        printf 'The following prerequisites are not installed: %s.\n' "$commaDelimited"
+        printf 'You must install them before using nomon.\n'
+    fi
+    printf 'With Homebrew:\n'
+    printf '\t$ brew install %s\n' "${allMissing}"
+    printf 'With apt:\n'
+    printf '\t$ sudo apt update && sudo apt install install %s\n' "${allMissing}"
+    printf 'With dnf:\n'
+    printf '\t$ sudo dnf install %s\n' "${allMissing}"
+    printf 'With yum:\n'
+    printf '\t$ sudo yum install %s\n' "${allMissing}"
+    printf 'With pacman:\n'
+    printf '\t$ sudo pacman -S %s\n' "$allMissing"
+    if [[ " $* " =~ " fswatch " ]]
+    then
+        printf 'Installing fswatch on Arch Linux with makepkg (following all steps and warnings listed at %s):\n' "${AURInstructionsURL}"
+        printf '\t$ git clone %s\n' "${AURGitRepoURL}"
+        printf '\t$ cd %s\n' "${AURPackageName}"
+        printf '\t$ makepkg -sirc\n'
+    fi
+
+}
+
+prereqCheck() {
+    local -a missingPrereqs=()
+
+    while test "$#" -gt 0
+    do
+        local prereq="$1"
+
+        which "$prereq" > /dev/null 2>&1
+        prereqCheckResult="$?"
+
+        test "$prereqCheckResult" -ne 0 && missingPrereqs+=("$prereq")
+
+        shift
+    done
+
+    local missingCount="${#missingPrereqs[@]}"
+
+    if [ "$missingCount" -eq 0 ]
+    then
+        return 0
+    fi
+
+    __installInstructions "${missingPrereqs[@]}"
+
+    exit 1
+}
+

@@ -1,0 +1,88 @@
+# provides printVar, printArr, tabsWidth and getLengthInTabs
+# source flag is __pretty_print_source set to "sourced"
+
+__pretty_print_source="sourced"
+
+# This will cause a blip on the screen. Unfortunately, there's no better way to find the width
+# of a tab.
+echo -ne 'a\tb'  &&
+    echo -ne "\033[6n"
+read -rs -d\[ _
+read -rs -dR tabsWidth
+tabsWidth=$(cut -d";" -f2 <<< "$tabsWidth")
+printf "\r\e[0K" # reset terminal
+tabsWidth="$((tabsWidth - 2))"
+
+getLengthInTabs() {
+    local arg=$1
+    local argLength="${#arg}"
+    local tabLength=$(( argLength / tabsWidth ))
+    printf '%s' "$tabLength"
+}
+
+__getLongestNameLen() {
+    local longestVar="0"
+    while test $# -gt 0
+    do
+        local var="$1"
+        test "${#var}" -gt "${longestVar}" && longestVar="${#var}"
+        shift
+    done
+    printf '%s' "${longestVar}"
+}
+
+__repeatStr() {
+    local repeatCount=$1
+    local strToRepeat=$2
+    local str=""
+    if [ "$repeatCount" -le 0 ]
+    then
+        return 0
+    fi
+
+    for i in $(seq $repeatCount)
+    do
+        str="$strToRepeat$str"
+    done
+
+    printf '%s' "$str"
+}
+
+__getPadding() {
+    local longestLen=$1
+    local name=$2
+    local nameLen=${#name}
+    local spaceCount=$(( longestLen - nameLen ))
+
+    __repeatStr $spaceCount " "
+}
+
+printVar() {
+    local longestNameLen="$(__getLongestNameLen "$@")"
+    while test $# -gt 0
+    do
+        local varName=$1
+        local padding="$(__getPadding $longestNameLen $varName)"
+        printf '%s%s = %s\n' "$padding" "$varName" "${!varName}"
+        shift
+    done
+}
+
+printArr() {
+    local longestNameLen="$(__getLongestNameLen "$@")"
+    while test $# -gt 0
+    do
+        local arrName=$1
+        local tmp=$arrName[@]
+        local arr=("${!tmp}")
+
+        local padding="$(__getPadding $longestNameLen $arrName)"
+
+        local tmpPrintRes
+        printf -v tmpPrintRes '"%s", ' "${arr[@]}"
+
+
+        printf '%s%s = (%s)\n'  "$padding" "$arrName" "${tmpPrintRes%, }"
+        shift
+    done
+}
