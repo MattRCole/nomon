@@ -8,7 +8,7 @@ test "$__escape_source" != "sourced" && source "${sourceDir}/__escape.source"
 
 
 # ARG_OPTIONAL_REPEATED([ext],[e],[extensions to look for, ie. js. use once for each extension to watch.])
-# ARG_OPTIONAL_SINGLE([exec],[x],[execute arguments with executible, ie, -x "python -v".],[sh -c])
+# ARG_OPTIONAL_SINGLE([exec],[x],[execute arguments with executable, ie, -x "python -v".],[sh -c])
 # ARG_OPTIONAL_REPEATED([watch],[w],[watch directory or files. use once for each directory or file to watch.])
 # ARG_OPTIONAL_REPEATED([ignore],[i],[ignore the given regex pattern. use once for each pattern you would like to ignore.])
 # ARG_OPTIONAL_SINGLE([REPLACEME],[],[to tell nomon stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated])
@@ -57,7 +57,7 @@ print_help()
     printf 'Usage: %s [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--ignore <arg>] [-c|--(no-)clear-screen] [-h|--help] [<arguments-1>] ... [<arguments-n>] [--] [<arguments-n>]...\n' "$0"
     printf '\t%s\n' "<arguments>: to be passed to the specified executable (set with the --exec argument)"
     printf '\t%s\n' "-e, --ext: extensions to look for, ie. js. use once for each extension to watch. (empty by default)"
-    printf '\t%s\n' "-x, --exec: execute arguments with executible, ie, -x \"python -v\". (default: 'sh -c')"
+    printf '\t%s\n' "-x, --exec: execute arguments with executable, ie, -x \"python -v\". (default: 'sh -c')"
     printf '\t%s\n' "-w, --watch: watch directory or files. use once for each directory or file to watch. (empty by default)"
     printf '\t%s\n' "-i, --ignore: ignore the given regex pattern. use once for each pattern you would like to ignore. (empty by default)"
     printf '\t%s\n' "--: to tell nomon stop slurping arguments"
@@ -181,7 +181,7 @@ assign_positional_args 1 "${_positionals[@]}"
 # -------- ARGBASH DONE -----------
 
 # Since we stop evaluating arguments after the -- argument, we need to tack everything after that onto _arg_arguments
-assigneRestOfArguments() {
+assignRestOfArguments() {
     # drop everything until --
     while test $# -gt 0
     do
@@ -225,7 +225,7 @@ evaluateExtensions() {
     done
 }
 
-assigneRestOfArguments "$@"
+assignRestOfArguments "$@"
 watchPaths=($(evaluateRealPaths "${_arg_watch[@]}"))
 test "${#_arg_ext[@]}" -gt 0 && doWatchExtension="on" || doWatchExtension="off"
 test "${#_arg_watch[@]}" -eq 0 && _arg_watch+=("$PWD")
