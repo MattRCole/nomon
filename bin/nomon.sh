@@ -343,7 +343,7 @@ handleKillProcess() {
     local childPids="$(findChildPids  $currentTaskPid)"
     if [ -n "$childPids" ]
     then
-        (kill $childPids) 2>/dev/null
+        kill $childPids 2>/dev/null
     fi
 }
 
