@@ -233,24 +233,18 @@ test "${#_arg_ignore[@]}" -gt 0 && doWatchIgnore="on" || doWatchIgnore="off"
 test "$doWatchIgnore" = "on" && ignorePaths=($(evaluateRealPaths "${_arg_ignore[@]}")) || ignorePaths=()
 test "$doWatchExtension" = "on" && watchExtensions=($(evaluateExtensions "${_arg_ext[@]}")) || watchExtensions=()
 
-# printVar doWatchExtension doWatchIgnore commandToRun
-# printArr _positionals _arg_arguments _arg_ext _arg_exec _arg_ignore watchPaths watchExtensions ignorePaths commandArguments
-
-fifoName="/tmp/nomon/$(uuidgen)"
-mkdir -p "$(dirname $fifoName)"
+pendingPidFile="/tmp/nomon/$(uuidgen)"
+mkdir -p "$(dirname $pendingPidFile)"
 
 runInBackground() {
-    # stmnt=$(escapeAll "$@")
-    # eval "$stmnt" &
-    # echo "$@"
     eval "$@" &
-    toReturn="$(ps -ef | grep -F --regexp="$(echo -n "$@")" - | awk ' !/grep/ {result = $2} END { print result }')"
-    echo "$toReturn" > "$fifoName"
+    local jobPid=$!
+    printf '%d' $jobPid > "$pendingPidFile"
 }
 
 handleSigInt() {
     handleKillProcess
-    rm "$fifoName"
+    rm "$pendingPidFile"
     exit 0
 }
 
@@ -276,6 +270,39 @@ isInPaths() {
     return 1
 }
 
+findChildPids () {
+    local startingPid=$1
+    local -a myStack=( $startingPid )
+    local -a resultPids
+    local nextPid
+    local childPids
+
+
+    while [ ${#myStack[@]} -gt 0 ]
+    do
+        nextPid=${myStack[0]}
+        myStack=("${myStack[@]:1}")
+        childPids="$(pgrep -P $nextPid)"
+        if [ $? -ne 0 ]
+        then
+            continue
+        fi
+
+        for childPid in $childPids
+        do
+            # only add pid if it's not already present
+            if [[ " ${resultPids[*]} " =~ [[:space:]]${childPid}[[:space:]] ]]
+            then
+                continue
+            else
+                resultPids+=($childPid)
+                myStack+=($childPid)
+            fi
+        done
+    done
+    printf "${resultPids[*]}"
+}
+
 hasWatchedExtension() {
     local filename="$(basename "$1")"
     local filenameTerminator="${filename##*.}"
@@ -290,10 +317,8 @@ hasWatchedExtension() {
 handleFileChange() {
     while IFS="\n" read fileThatChanged
     do
-        # echo handling $fileThatChanged
         if [ "$doWatchExtension" = "off" ]
         then
-            # echo "no extensions to watch"
             handleStartNewProcess
             continue
         fi
@@ -308,35 +333,36 @@ handleFileChange() {
 }
 
 handleKillProcess() {
-    if [ "$currentTaskPid" != "nope" ]
+    currentTaskPid="$(cat "$pendingPidFile")"
+
+    if [ "$currentTaskPid" = "nope" ]
     then
-        kill $(jobs -p) > /dev/null 2>&1
-        # kill "$currentTaskPid" >/dev/null 2>&1
-        currentTaskPid="nope"
+        return 0
+    fi
+
+    local childPids="$(findChildPids  $currentTaskPid)"
+    if [ -n "$childPids" ]
+    then
+        (kill $childPids) 2>/dev/null
     fi
 }
 
 handleStartNewProcess() {
+    handleKillProcess
     if [ "$_arg_clear_screen" = "on" ]
     then
         clear
         printf '\e[3J'
     fi
-    handleKillProcess
     runInBackground "$_arg_exec" $(escapeAll "${_arg_arguments[@]}")
-    currentTaskPid="$(cat "$fifoName")"
+    currentTaskPid="$(cat "$pendingPidFile")"
 }
 
-# echo 'hi'
+printf 'nope' > "$pendingPidFile"
 
 handleStartNewProcess
 
-# echo 'hello'
-
-# echo fswatch -r --extended $(test "$doWatchIgnore" = "on" && printf ' -e '"\'"'%s'"\'"' ' "${_arg_ignore[@]}") "${watchPaths[@]}" / handleFileChange
 sh -c "fswatch -r --extended $(test "$doWatchIgnore" = "on" && printf ' -e '"\'"'%s'"\'"' ' "${_arg_ignore[@]}") ${watchPaths[@]}" | handleFileChange
 
-# echo 'ahoy'
-
-rm "$fifoName"
 handleKillProcess
+rm "$pendingPidFile"
