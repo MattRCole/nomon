@@ -4,7 +4,9 @@ It's NodeMon without Node.
 
 ## Project description
 
-A very large script that uses `fswatch` to emulate NodeMon's behaviors.
+`nomon.sh` monitors your files/directories and runs a command whenever they change.
+
+Under the hood it's just a script that uses `fswatch`, but it also handles process termination and, optionally, screen clearing.
 
 YMMV, it works on my machine etc, but I am very open to PRs if you find and fix a problem.
 
