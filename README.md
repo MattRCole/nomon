@@ -47,6 +47,13 @@ git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon && printf
 
 #### Install and add to path for `zsh` users:
 
+```shell
+git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon && printf '"'"'\nexport PATH="${PATH}:${HOME}/.nomon/bin"\n'"'"' >> "${HOME}/.zshrc"
+```
+
+#### Wait, I use a different shell!
+
+Sorry about that, but feel free to make a PR to update the readme!
 
 ## Uninstall
 
