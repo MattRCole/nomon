@@ -32,6 +32,7 @@ The `--ignore` option uses [POSIX Extended Regular Expressions](https://pubs.ope
 
 ## Installation
 
+Make sure you have [`fswatch`](https://github.com/emcrisostomo/fswatch) installed.
 
 Add `<this-folder>/bin` to your path.
 
