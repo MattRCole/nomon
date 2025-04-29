@@ -30,17 +30,51 @@ Usage: nomon.sh [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--igno
 
 The `--ignore` option uses [POSIX Extended Regular Expressions](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04), not glob. Might change this in the future.
 
+### Example usage
+
+It uses almost the same options as `NodeMon`, so if you've used that tool, it should be familiar.
+
+Run pytest whenever a file changes in the current directory:
+
+`nomon.sh --ext py --watch . --ignore '.*__pycache__.*' --ignore '\.git.*' --exec "python -m" --clear-screen -- pytest .`
+
+The same command with "short" options:
+
+`nomon.sh -e py -w . -i '.*__pycache__.*' -i '\.git.*' -x "python -m" -c -- pytest .`
+
+For additional help run:
+
+`nomon.sh --help`
+
 ## Installation
 
 Make sure you have [`fswatch`](https://github.com/emcrisostomo/fswatch) installed.
 
-Add `<this-folder>/bin` to your path.
+### Installing `fswatch`:
 
-### Just give me a script
+#### On `macOs` with `homebrew`:
 
-Okay fine. If you have `git` installed, here are some copy-paste commands for installation:
+```shell
+brew install fswatch
+```
 
-#### Install and add to path for `bash` users:
+#### On debian based `linux` distributions:
+
+```shell
+sudo apt update && sudo apt install fswatch
+```
+
+#### Windows an other systems
+
+Note for `Windows`:
+
+While you can install `fswatch`, `nomon.sh` doesn't run directly on windows. You will have to use a tool like [`MinGW`](https://www.mingw-w64.org/) or `WSL` to run `nomon.sh`.
+
+Please see [`fswatch`'s readme](https://github.com/emcrisostomo/fswatch?tab=readme-ov-file#getting-fswatch) for more info on installing `fswatch` on other systems.
+
+### Installing `nomon.sh`:
+
+#### `bash`: Install `nomon.sh` and enable completions:
 
 ```shell
 git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon"
@@ -55,7 +89,7 @@ source "${HOME}/.nomon/completions/nomon_sh_completions.sh"\n
 
 
 
-#### Install and add to path for `zsh` users:
+#### `zsh`: Install `nomon.sh` and enable completions:
 
 ```shell
 git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon"
@@ -75,25 +109,7 @@ Feel free to make a PR to update the readme!
 
 ## Uninstall
 
-
 - Remove `<this-folder>/bin` from your path
 
 - Remove any related `nomon.sh` entries from your shell's config (`.profile` for `bash` and `.zshrc` for zsh)
 
-
-## Example usage
-
-It uses almost the same options as `NodeMon`, so if you've used that tool, it should be familiar.
-
-Run pytest whenever a file changes in the current directory:
-
-`nomon.sh --ext py --watch . --ignore '.*__pycache__.*' --ignore '\.git.*' --exec "python -m" --clear-screen -- pytest .`
-
-The same command with "short" options:
-
-`nomon.sh -e py -w . -i '.*__pycache__.*' -i '\.git.*' -x "python -m" -c -- pytest .`
-
-
-For additional help run:
-
-`nomon.sh --help`
