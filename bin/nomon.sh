@@ -288,7 +288,8 @@ runInBackground() {
 }
 
 handleSigInt() {
-    handleKillProcess
+    # a more thorough way of ending all tasks
+    pkill -g "$$"
     exit 0
 }
 
@@ -362,20 +363,17 @@ handleFileChange() {
     local doReload="false"
     while IFS="\n" read fileThatChanged
     do
-        echo "$fileThatChanged" >> debug.txt
         if [ "$fileThatChanged" != "$nomonBatchSeparator" ]
         then
             if [ "$doReload" = "false" ]
             then
                 if [ "$doWatchExtension" = "off" ]
-        then
-                    echo "Triggering restart at end of batch" >> debug.txt
+                then
                     doReload="true"
                 else
                     hasWatchedExtension "$fileThatChanged"
                     local tmpRes=$?
                     doReload="$(test "$tmpRes" -eq 0 && printf 'true' || printf 'false')"
-                    test "$doReload" = "true" && echo "Triggering restart at end of batch" >> debug.txt
                 fi
             fi
         else
@@ -383,10 +381,7 @@ handleFileChange() {
             doReload="false"
             if [ "$tmpDoReload" = "true" ]
             then
-                echo "triggering reload" >> debug.txt
-            handleStartNewProcess
-            else
-                echo "skipping reload" >> debug.txt
+                handleStartNewProcess
             fi
         fi
     done <"${1:-/dev/stdin}"
