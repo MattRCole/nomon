@@ -201,7 +201,7 @@ assign_positional_args()
 }
 
 parse_commandline "$@"
-prereqCheck fswatch realpath uuidgen
+prereqCheck fswatch realpath
 assign_positional_args 1 "${_positionals[@]}"
 
 
@@ -279,18 +279,16 @@ test "${#_arg_watch[@]}" -eq 0 && _arg_watch+=("$PWD")
 test "${#_arg_ignore[@]}" -gt 0 && doWatchIgnore="on" || doWatchIgnore="off"
 test "$doWatchExtension" = "on" && watchExtensions=($(evaluateExtensions "${_arg_ext[@]}")) || watchExtensions=()
 
-pendingPidFile="/tmp/nomon/$(uuidgen)"
-mkdir -p "$(dirname $pendingPidFile)"
+pendingTaskPid="nope"
 
 runInBackground() {
     eval "$@" &
     local jobPid=$!
-    printf '%d' $jobPid > "$pendingPidFile"
+    pendingTaskPid="$jobPid"
 }
 
 handleSigInt() {
     handleKillProcess
-    rm "$pendingPidFile"
     exit 0
 }
 
@@ -298,7 +296,6 @@ handleSigInt() {
 trap "" SIGCHLD
 trap handleSigInt SIGINT
 
-currentTaskPid="nope"
 
 isInPaths() {
     local toCheck=$1
@@ -379,18 +376,18 @@ handleFileChange() {
 }
 
 handleKillProcess() {
-    currentTaskPid="$(cat "$pendingPidFile")"
-
-    if [ "$currentTaskPid" = "nope" ]
+    if [ "$pendingTaskPid" = "nope" ]
     then
         return 0
     fi
 
-    local childPids="$(findChildPids  $currentTaskPid)"
+    local childPids="$(findChildPids  $pendingTaskPid)"
     if [ -n "$childPids" ]
     then
         kill $childPids 2>/dev/null
     fi
+
+    pendingTaskPid="nope"
 }
 
 handleStartNewProcess() {
@@ -401,10 +398,7 @@ handleStartNewProcess() {
         printf '\e[3J'
     fi
     runInBackground "$_arg_exec" $(escapeAll "${_arg_arguments[@]}")
-    currentTaskPid="$(cat "$pendingPidFile")"
 }
-
-printf 'nope' > "$pendingPidFile"
 
 handleStartNewProcess
 
@@ -414,4 +408,3 @@ watchIgnoreFlag="$(test "$doWatchIgnore" = "on" && printf ' -e '"\'"'%s'"\'"' ' 
 sh -c "fswatch -r --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
 
 handleKillProcess
-rm "$pendingPidFile"
