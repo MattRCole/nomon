@@ -356,22 +356,39 @@ hasWatchedExtension() {
     return 1
 }
 
+nomonBatchSeparator="NodemonEndBatch"
 
 handleFileChange() {
+    local doReload="false"
     while IFS="\n" read fileThatChanged
     do
-        if [ "$doWatchExtension" = "off" ]
+        echo "$fileThatChanged" >> debug.txt
+        if [ "$fileThatChanged" != "$nomonBatchSeparator" ]
         then
+            if [ "$doReload" = "false" ]
+            then
+                if [ "$doWatchExtension" = "off" ]
+        then
+                    echo "Triggering restart at end of batch" >> debug.txt
+                    doReload="true"
+                else
+                    hasWatchedExtension "$fileThatChanged"
+                    local tmpRes=$?
+                    doReload="$(test "$tmpRes" -eq 0 && printf 'true' || printf 'false')"
+                    test "$doReload" = "true" && echo "Triggering restart at end of batch" >> debug.txt
+                fi
+            fi
+        else
+            local tmpDoReload="$doReload"
+            doReload="false"
+            if [ "$tmpDoReload" = "true" ]
+            then
+                echo "triggering reload" >> debug.txt
             handleStartNewProcess
-            continue
+            else
+                echo "skipping reload" >> debug.txt
+            fi
         fi
-        local hasWatchedExtensionResult
-        hasWatchedExtension $fileThatChanged
-        hasWatchedExtensionResult="$?"
-
-        test "$hasWatchedExtensionResult" -ne 0 && continue
-
-        handleStartNewProcess
     done <"${1:-/dev/stdin}"
 }
 
@@ -405,6 +422,6 @@ handleStartNewProcess
 fswatchMonitorOverride="$(test -n "$_arg_monitor" && printf '%s %s' '-m' "$_arg_monitor" || printf '')"
 watchIgnoreFlag="$(test "$doWatchIgnore" = "on" && printf ' -e '"\'"'%s'"\'"' ' "${_arg_ignore[@]}" || printf '')"
 
-sh -c "fswatch -r --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
+sh -c "fswatch --batch-marker="$nomonBatchSeparator" -r --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
 
 handleKillProcess
