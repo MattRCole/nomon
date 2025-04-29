@@ -35,14 +35,21 @@ The `--ignore` option uses [POSIX Extended Regular Expressions](https://pubs.ope
 
 Add `<this-folder>/bin` to your path.
 
-### Just give me a one-liner
+### Just give me a script
 
-Okay fine. If you have `git` installed, here are some one-liners:
+Okay fine. If you have `git` installed, here are some copy-paste commands for installation:
 
 #### Install and add to path for `bash` users:
 
 ```shell
-git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon && printf '"'"'\nexport PATH="${PATH}:${HOME}/.nomon/bin"\n'"'"' >> "${HOME}/.profile"
+git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon"
+
+printf '
+# Add nomon.sh to path
+export PATH="${PATH}:${HOME}/.nomon/bin"
+# Add nomon.sh completions
+source "${HOME}/.nomon/completions/nomon_sh_completions.sh"\n
+' >> "${HOME}/.profile"
 ```
 
 
@@ -50,17 +57,27 @@ git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon && printf
 #### Install and add to path for `zsh` users:
 
 ```shell
-git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon && printf '"'"'\nexport PATH="${PATH}:${HOME}/.nomon/bin"\n'"'"' >> "${HOME}/.zshrc"
+git clone --depth 1 https://github.com/mattrcole/nomon "${HOME}/.nomon"
+
+printf '
+# Add nomon.sh to path
+export PATH="${PATH}:${HOME}/.nomon/bin"
+# Add nomon.sh completions
+autoload -Uz "${HOME}/.nomon/completions/_nomon.sh"\n
+compdef _nomon.sh nomon.sh
+' >> "${HOME}/.zshrc"
 ```
 
 #### Wait, I use a different shell!
 
-Sorry about that, but feel free to make a PR to update the readme!
+Feel free to make a PR to update the readme!
 
 ## Uninstall
 
 
-Remove `<this-folder>/bin` from your path
+- Remove `<this-folder>/bin` from your path
+
+- Remove any related `nomon.sh` entries from your shell's config (`.profile` for `bash` and `.zshrc` for zsh)
 
 
 ## Example usage
