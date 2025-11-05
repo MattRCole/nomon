@@ -61,7 +61,7 @@ print_help()
     printf '\t%s\n' "<arguments>: to be passed to the specified executable (set with the --exec argument)"
     printf '\t%s\n' "-e, --ext: extensions to look for, ie. js. use once for each extension to watch (empty by default)"
     printf '\t%s\n' "-x, --exec: execute arguments with executable, ie, -x \"python -v\" (default: 'sh -c')"
-    printf '\t%s\n' "-w, --watch: watch directory or files. use once for each directory or file to watch (empty by default)"
+    printf '\t%s\n' "-w, --watch: watch directory or files. use once for each directory or file to watch (current directory by default)"
     printf '\t%s\n' "-i, --ignore: ignore the given regex pattern. use once for each pattern you would like to ignore (empty by default)"
     printf '\t%s\n' "-m, --monitor: Specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors (let fswatch choose by default)"
     printf '\t%s\n' "-M, --list-monitors: List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does (off by default)"
@@ -417,6 +417,6 @@ handleStartNewProcess
 fswatchMonitorOverride="$(test -n "$_arg_monitor" && printf '%s %s' '-m' "$_arg_monitor" || printf '')"
 watchIgnoreFlag="$(test "$doWatchIgnore" = "on" && printf ' -e '"\'"'%s'"\'"' ' "${_arg_ignore[@]}" || printf '')"
 
-sh -c "fswatch --batch-marker="$nomonBatchSeparator" -r --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
+sh -c "fswatch --batch-marker="$nomonBatchSeparator" -r --event="Created" --event="Updated" --event="Removed" --event="Renamed" --event="MovedTo" --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
 
 handleKillProcess
