@@ -417,6 +417,6 @@ handleStartNewProcess
 fswatchMonitorOverride="$(test -n "$_arg_monitor" && printf '%s %s' '-m' "$_arg_monitor" || printf '')"
 watchIgnoreFlag="$(test "$doWatchIgnore" = "on" && printf ' -e '"\'"'%s'"\'"' ' "${_arg_ignore[@]}" || printf '')"
 
-sh -c "fswatch --batch-marker="$nomonBatchSeparator" -r --event="Created" --event="Updated" --event="Removed" --event="Renamed" --event="MovedTo" --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
+sh -c "fswatch --batch-marker="$nomonBatchSeparator" -r --event="Created" --event="Updated" --event="Removed" --event="Renamed" --event="MovedTo" --event="MovedFrom" --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
 
 handleKillProcess
