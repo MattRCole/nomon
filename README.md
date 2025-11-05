@@ -19,7 +19,7 @@ Usage: nomon.sh [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--igno
         <arguments>: to be passed to the specified executable (set with the --exec argument)
         -e, --ext: extensions to look for, ie. js. use once for each extension to watch (empty by default)
         -x, --exec: execute arguments with executable, ie, -x "python -v" (default: 'sh -c')
-        -w, --watch: watch directory or files. use once for each directory or file to watch (empty by default)
+        -w, --watch: watch directory or files. use once for each directory or file to watch (current directory by default)
         -i, --ignore: ignore the given regex pattern. use once for each pattern you would like to ignore (empty by default)
         -m, --monitor: Specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors (let fswatch choose by default)
         -M, --list-monitors: List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does (off by default)
