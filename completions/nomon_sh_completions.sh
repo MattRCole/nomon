@@ -6,8 +6,8 @@ _nomon_sh ()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    all_long_opts="--ext --exec --watch --ignore --monitor --list-monitors -- --clear-screen --help "
-    all_short_opts="-e -x -w -i -m -M -c -h "
+    all_long_opts="--ext --exec --watch --ignore --monitor --list-monitors -- --clear-screen --help --ignore-dot-files --no-ignore-dotfiles "
+    all_short_opts="-e -x -w -i -m -M -c -h -d -D "
 
     if [[ " ${COMP_WORDS[*]} " =~ [[:space:]]--[[:space:]] && "$cur" != '--' ]]; then
         # Stop completion when -- is found

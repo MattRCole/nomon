@@ -6,15 +6,16 @@ sourceDir="$(realpath "$scriptDir/../source")"
 test "$__prereq_check_source" != "sourced" && source "${sourceDir}/__prereq-check.source"
 test "$__escape_source" != "sourced" && source "${sourceDir}/__escape.source"
 
-# ARG_OPTIONAL_REPEATED([ext],[e],[extensions to look for, ie. js. use once for each extension to watch])
-# ARG_OPTIONAL_SINGLE([exec],[x],[execute arguments with executable, ie, -x "python -v"],[sh -c])
-# ARG_OPTIONAL_REPEATED([watch],[w],[watch directory or files. use once for each directory or file to watch])
-# ARG_OPTIONAL_REPEATED([ignore],[i],[ignore the given regex pattern. use once for each pattern you would like to ignore])
+# ARG_OPTIONAL_REPEATED([ext],[e],[Extensions to look for, ie. js. use once for each extension to watch])
+# ARG_OPTIONAL_SINGLE([exec],[x],[Execute arguments with executable, ie, -x "python -v"],[sh -c])
+# ARG_OPTIONAL_REPEATED([watch],[w],[Watch directory or files. use once for each directory or file to watch])
+# ARG_OPTIONAL_REPEATED([ignore],[i],[Ignore the given regex pattern. use once for each pattern you would like to ignore])
 # ARG_OPTIONAL_SINGLE([monitor],[m],[Specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors])
 # ARG_OPTIONAL_BOOLEAN([list-monitors],[M],[List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does])
-# ARG_OPTIONAL_SINGLE([REPLACEME],[],[to tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated])
-# ARG_OPTIONAL_BOOLEAN([clear-screen],[c],[clear the screen between each run])
-# ARG_POSITIONAL_INF([arguments],[to be passed to the specified executable (set with the --exec argument)],[0])
+# ARG_OPTIONAL_BOOLEAN([ignore-dotfiles],[d],[Ignore any folder/file that begins with a '.' equivalent to adding -i '(^|.*/)\.[^/].*'],[on])
+# ARG_OPTIONAL_SINGLE([REPLACEME],[],[To tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated])
+# ARG_OPTIONAL_BOOLEAN([clear-screen],[c],[Clear the screen between each run])
+# ARG_POSITIONAL_INF([arguments],[To be passed to the specified executable (set with the --exec argument)],[0])
 # ARG_HELP([Watch for file changes and execute a program whenever changes are detected])
 # ARGBASH_GO()
 # needed because of Argbash --> m4_ignore([
@@ -35,7 +36,7 @@ die()
 
 begins_with_short_option()
 {
-    local first_option all_short_options='exwimMch'
+    local first_option all_short_options='exwimMdDch'
     first_option="${1:0:1}"
     test "$all_short_options" = "${all_short_options/$first_option/}" && return 1 || return 0
 }
@@ -50,6 +51,7 @@ _arg_watch=()
 _arg_ignore=()
 _arg_monitor=
 _arg_list_monitors="off"
+_arg_ignore_dotfiles="on"
 _arg_replaceme=
 _arg_clear_screen="off"
 
@@ -57,16 +59,18 @@ _arg_clear_screen="off"
 print_help()
 {
     printf '%s\n' "Watch for file changes and execute a program whenever changes are detected"
-    printf 'Usage: %s [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--ignore <arg>] [-m|--monitor <arg>] [-M|--(no-)list-monitors] [--REPLACEME <arg>] [-c|--(no-)clear-screen] [-h|--help] [<arguments-1>] ... [<arguments-n>] ...\n' "nomon.sh"
-    printf '\t%s\n' "<arguments>: to be passed to the specified executable (set with the --exec argument)"
-    printf '\t%s\n' "-e, --ext: extensions to look for, ie. js. use once for each extension to watch (empty by default)"
-    printf '\t%s\n' "-x, --exec: execute arguments with executable, ie, -x \"python -v\" (default: 'sh -c')"
-    printf '\t%s\n' "-w, --watch: watch directory or files. use once for each directory or file to watch (current directory by default)"
-    printf '\t%s\n' "-i, --ignore: ignore the given regex pattern. use once for each pattern you would like to ignore (empty by default)"
+    printf 'Usage: %s [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--ignore <arg>] [-m|--monitor <arg>] [-M|--(no-)list-monitors] [-d|--(no-)ignore-dotfiles|-D] [-c|--(no-)clear-screen] [-h|--help] [--] [<arguments-1>] ... [<arguments-n>] ...\n' "nomon.sh"
+    printf '\t%s\n' "<arguments>: To be passed to the specified executable (set with the --exec argument)"
+    printf '\t%s\n' "-e, --ext: Extensions to look for, ie. js. use once for each extension to watch (empty by default)"
+    printf '\t%s\n' "-x, --exec: Execute arguments with executable, ie, -x \"python -v\" (default: 'sh -c')"
+    printf '\t%s\n' "-w, --watch: Watch directory or files. use once for each directory or file to watch (current directory by default)"
+    printf '\t%s\n' "-i, --ignore: Ignore the given regex pattern. use once for each pattern you would like to ignore (empty by default)"
     printf '\t%s\n' "-m, --monitor: Specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors (let fswatch choose by default)"
     printf '\t%s\n' "-M, --list-monitors: List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does (off by default)"
+    printf '\t%s\n' "-d, --ignore-dotfiles: Ignore any folder/file that begins with a '.' equivalent to adding -i '(^|.*/)\.[^/].*' (on by default)"
+    printf '\t%s\n' "--no-ignore-dotfiles, -D: Do not ignore folders/files that begin with a '.' (off by default)"
     printf '\t%s\n' "--: to tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated (no default)"
-    printf '\t%s\n' "-c, --clear-screen, --no-clear-screen: clear the screen between each run (off by default)"
+    printf '\t%s\n' "-c, --clear-screen, --no-clear-screen: Clear the screen between each run (off by default)"
     printf '\t%s\n' "-h, --help: Prints help"
 }
 
@@ -74,6 +78,7 @@ print_help()
 parse_commandline()
 {
     _positionals_count=0
+    local _key
     while test $# -gt 0
     do
         _key="$1"
@@ -144,7 +149,30 @@ parse_commandline()
                     { begins_with_short_option "$_next" && shift && set -- "-M" "-${_next}" "$@"; } || die "The short option '$_key' can't be decomposed to ${_key:0:2} and -${_key:2}, because ${_key:0:2} doesn't accept value and '-${_key:2:1}' doesn't correspond to a short option."
                 fi
                 ;;
+            -d|-D|--no-ignore-dotfiles|--ignore-dotfiles)
+                _arg_ignore_dotfiles="on"
+                test "${1:0:5}" = "--no-" && _arg_ignore_dotfiles="off"
+                # CUSTOM
+                test "$1" = "-D" && _arg_ignore_dotfiles="off"
+                # END CUSTOM
+                ;;
+            -d*)
+                _arg_ignore_dotfiles="on"
+                _next="${_key##-d}"
+                if test -n "$_next" -a "$_next" != "$_key"
+                then
+                    { begins_with_short_option "$_next" && shift && set -- "-d" "-${_next}" "$@"; } || die "The short option '$_key' can't be decomposed to ${_key:0:2} and -${_key:2}, because ${_key:0:2} doesn't accept value and '-${_key:2:1}' doesn't correspond to a short option."
+                fi
+                ;;
             # CUSTOM
+            -D*)
+                _arg_ignore_dotfiles="off"
+                _next="${_key##-D}"
+                if test -n "$_next" -a "$_next" != "$_key"
+                then
+                    { begins_with_short_option "$_next" && shift && set -- "-D" "-${_next}" "$@"; } || die "The short option '$_key' can't be decomposed to ${_key:0:2} and -${_key:2}, because ${_key:0:2} doesn't accept value and '-${_key:2:1}' doesn't correspond to a short option."
+                fi
+                ;;
             --)
                 shift
                 break
@@ -273,9 +301,9 @@ evaluateExtensions() {
 }
 
 assignRestOfArguments "$@"
+test "${#_arg_watch[@]}" -eq 0 && _arg_watch+=("$PWD")
 watchPaths=($(evaluateRealPaths "${_arg_watch[@]}"))
 test "${#_arg_ext[@]}" -gt 0 && doWatchExtension="on" || doWatchExtension="off"
-test "${#_arg_watch[@]}" -eq 0 && _arg_watch+=("$PWD")
 test "${#_arg_ignore[@]}" -gt 0 && doWatchIgnore="on" || doWatchIgnore="off"
 test "$doWatchExtension" = "on" && watchExtensions=($(evaluateExtensions "${_arg_ext[@]}")) || watchExtensions=()
 
@@ -416,6 +444,10 @@ handleStartNewProcess
 
 fswatchMonitorOverride="$(test -n "$_arg_monitor" && printf '%s %s' '-m' "$_arg_monitor" || printf '')"
 watchIgnoreFlag="$(test "$doWatchIgnore" = "on" && printf ' -e '"\'"'%s'"\'"' ' "${_arg_ignore[@]}" || printf '')"
+if [ "$_arg_ignore_dotfiles" = "on" ]
+then
+watchIgnoreFlag="${watchIgnoreFlag} -e '"'(^|.*/)\.[^/].*'"'"
+fi
 
 sh -c "fswatch --batch-marker="$nomonBatchSeparator" -r --event="Created" --event="Updated" --event="Removed" --event="Renamed" --event="MovedTo" --event="MovedFrom" --extended $watchIgnoreFlag $fswatchMonitorOverride ${watchPaths[@]}" | handleFileChange
 

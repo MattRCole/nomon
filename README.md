@@ -15,14 +15,16 @@ YMMV, it works on my machine etc, but I am very open to PRs if you find and fix 
 Usage is quite similar to NodeMon but has a few additional options related to `fswatch`.
 
 ```shell
-Usage: nomon.sh [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--ignore <arg>] [-m|--monitor <arg>] [-M|--(no-)list-monitors] [--REPLACEME <arg>] [-c|--(no-)clear-screen] [-h|--help] [<arguments-1>] ... [<arguments-n>] ...
-        <arguments>: to be passed to the specified executable (set with the --exec argument)
-        -e, --ext: extensions to look for, ie. js. use once for each extension to watch (empty by default)
-        -x, --exec: execute arguments with executable, ie, -x "python -v" (default: 'sh -c')
-        -w, --watch: watch directory or files. use once for each directory or file to watch (current directory by default)
-        -i, --ignore: ignore the given regex pattern. use once for each pattern you would like to ignore (empty by default)
-        -m, --monitor: Specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors (let fswatch choose by default)
+Usage: nomon.sh [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--ignore <arg>] [-m|--monitor <arg>] [-M|--(no-)list-monitors] [-d|--(no-)ignore-dotfiles|-D] [-c|--(no-)clear-screen] [-h|--help] [--] [<arguments-1>] ... [<arguments-n>] ...
+        <arguments>: To be passed to the specified executable (set with the --exec argument)
+        -e, --ext: Extensions to look for, ie. js. use once for each extension to watch (empty by default)
+        -x, --exec: Execute arguments with executable, ie, -x "python -v" (default: 'sh -c')
+        -w, --watch: Watch directory or files. use once for each directory or file to watch (current directory by default)
+        -i, --ignore: Ignore the given regex pattern. use once for each pattern you would like to ignore (empty by default)
+        -m, --monitor: specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors (let fswatch choose by default)
         -M, --list-monitors: List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does (off by default)
+        -d, --ignore-dotfiles: Ignore any folder/file that begins with a '.' equivalent to adding -i '(^|.*/)\.[^/].*' (on by default)
+        --no-ignore-dotfiles, -D: Do not ignore folders/files that begin with a '.' (off by default)
         --: to tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated (no default)
         -c, --clear-screen, --no-clear-screen: clear the screen between each run (off by default)
         -h, --help: Prints help
