@@ -13,7 +13,7 @@ test "$__escape_source" != "sourced" && source "${sourceDir}/__escape.source"
 # ARG_OPTIONAL_SINGLE([monitor],[m],[Specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors])
 # ARG_OPTIONAL_BOOLEAN([list-monitors],[M],[List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does])
 # ARG_OPTIONAL_BOOLEAN([ignore-dotfiles],[d],[Ignore any folder/file that begins with a '.' equivalent to adding -i '(^|.*/)\.[^/].*'],[on])
-# ARG_OPTIONAL_SINGLE([REPLACEME],[],[To tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated])
+# ARG_OPTIONAL_SINGLE([REPLACEME],[],[Tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated])
 # ARG_OPTIONAL_BOOLEAN([clear-screen],[c],[Clear the screen between each run])
 # ARG_POSITIONAL_INF([arguments],[To be passed to the specified executable (set with the --exec argument)],[0])
 # ARG_HELP([Watch for file changes and execute a program whenever changes are detected])
@@ -68,8 +68,8 @@ print_help()
     printf '\t%s\n' "-m, --monitor: Specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors (let fswatch choose by default)"
     printf '\t%s\n' "-M, --list-monitors: List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does (off by default)"
     printf '\t%s\n' "-d, --ignore-dotfiles: Ignore any folder/file that begins with a '.' equivalent to adding -i '(^|.*/)\.[^/].*' (on by default)"
-    printf '\t%s\n' "--no-ignore-dotfiles, -D: Do not ignore folders/files that begin with a '.' (off by default)"
-    printf '\t%s\n' "--: to tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated (no default)"
+    printf '\t%s\n' "-D, --no-ignore-dotfiles: Do not ignore folders/files that begin with a '.' (off by default)"
+    printf '\t%s\n' "--: Tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated (no default)"
     printf '\t%s\n' "-c, --clear-screen, --no-clear-screen: Clear the screen between each run (off by default)"
     printf '\t%s\n' "-h, --help: Prints help"
 }

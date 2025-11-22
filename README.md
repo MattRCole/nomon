@@ -24,9 +24,9 @@ Usage: nomon.sh [-e|--ext <arg>] [-x|--exec <arg>] [-w|--watch <arg>] [-i|--igno
         -m, --monitor: specify the fswatch monitor to use. Use the --list-monitors (-M) flag to list all available fswatch monitors (let fswatch choose by default)
         -M, --list-monitors: List all available fswatch monitors and exit. See 'https://github.com/emcrisostomo/fswatch/wiki' for more information on each monitor and what it does (off by default)
         -d, --ignore-dotfiles: Ignore any folder/file that begins with a '.' equivalent to adding -i '(^|.*/)\.[^/].*' (on by default)
-        --no-ignore-dotfiles, -D: Do not ignore folders/files that begin with a '.' (off by default)
-        --: to tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated (no default)
-        -c, --clear-screen, --no-clear-screen: clear the screen between each run (off by default)
+        -D, --no-ignore-dotfiles: Do not ignore folders/files that begin with a '.' (off by default)
+        --: Tell nomon.sh stop slurping arguments, any arguments after this will be passed as arguments to the program you stipulated (no default)
+        -c, --clear-screen, --no-clear-screen: Clear the screen between each run (off by default)
         -h, --help: Prints help
 ```
 
